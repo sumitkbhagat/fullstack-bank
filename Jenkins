@@ -5,9 +5,7 @@ pipeline {
     tools{
         jdk 'jdk-11'
          nodejs 'node16'
-       
-        
-    }
+       }
     
     
     stages {
