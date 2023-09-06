@@ -1,1 +1,57 @@
 
+pipeline {
+    agent any
+    
+    tools{
+        jdk 'jdk-11'
+         nodejs 'node16'
+       
+        
+    }
+    
+    
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/sumitkbhagat/fullstack-bank.git'
+            }
+        }
+        
+         stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./app/backend --disableYarnAudit --disableNodeAudit', odcInstallation: 'DC'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        
+         stage('Backend') {
+            steps {
+                dir('/var/lib/jenkins/workspace/fullstack-bank/app/backend') {
+                    sh "npm install"
+                }
+            }
+        }
+         stage('frontend') {
+            steps {
+                dir('/var/lib/jenkins/workspace/fullstack-bank/app/frontend') {
+                    sh "npm install"
+                }
+            }
+        }
+          stage('Deploy to Conatiner') {
+            steps {
+                sh "npm run compose:up -d"
+            }
+        }
+     }
+        
+}
+
+
+    
